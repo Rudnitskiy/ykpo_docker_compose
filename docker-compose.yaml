@@ -1,0 +1,44 @@
+version: '2.0'
+name: myproject
+services:
+  server_cont:
+    image: cr.yandex/crpdnmccl7t9apcaugu8/tic-tac-toe-game-main-server_cont:latest
+    stdin_open: true
+    tty: true
+    ports:
+      - "2137"
+    networks:
+      static-network:
+        ipv4_address: 10.128.0.254
+    entrypoint: python server.py
+  client_human:
+    image: cr.yandex/crpdnmccl7t9apcaugu8/tic-tac-toe-game-main-client_human:latest
+    stdin_open: true
+    tty: true
+    networks:
+      static-network:
+    entrypoint: python3 client.py -p 2137 -4 10.128.0.254
+    depends_on: 
+      - server_cont
+    volumes:
+      - ./logs/:/tictactoe/logs
+  client_computer:
+    image: cr.yandex/crpdnmccl7t9apcaugu8/tic-tac-toe-game-main-client_computer:latest
+    stdin_open: true
+    tty: true
+    networks:
+      static-network:
+    entrypoint: python3 client.py -p 2137 -4 10.128.0.254 -a
+    depends_on: 
+      - server_cont
+    volumes:
+      - ./logs/:/tictactoe/logs
+
+networks:
+  static-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.128.0.0/24
+          gateway: 10.128.0.1
+
